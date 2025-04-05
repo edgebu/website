@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secondary School - Student Portal</title>
+  <script type="module">
+    // Firebase and app initialization code remains the same
+    // Import the necessary Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDfVvRtdrAEBMKGU_sUl8gvgrBDJSEHlZE",
+      authDomain: "students-information-8b94d.firebaseapp.com",
+      projectId: "students-information-8b94d",
+      storageBucket: "students-information-8b94d.firebasestorage.app",
+      messagingSenderId: "198014015238",
+      appId: "1:198014015238:web:05cb09243c6888d34cb087",
+      measurementId: "G-Z2F0SH78DF"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Registration form submission
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const name = document.getElementById('name').value;
+      const roll = document.getElementById('roll').value;
+
+      // Register user with email and password
+      createUserWithEmailAndPassword(auth, email, password)
+        .then(userCredential => {
+          const uid = userCredential.user.uid;
+          // Store student data in Firestore
+          return setDoc(doc(db, 'students', uid), {
+            name: name,
+            roll: roll,
+            email: email
+          });
+        })
+        .then(() => {
+          alert('Student Registered Successfully!');
+        })
+        .catch(error => {
+          alert(error.message);
+        });
+    });
+
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      // Log in user with email and password
+      signInWithEmailAndPassword(auth, email, password)
+        .then(userCredential => {
+          const uid = userCredential.user.uid;
+          // Retrieve student data from Firestore
+          return getDoc(doc(db, 'students', uid));
+        })
+        .then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('studentData').classList.remove('hidden');
+            document.getElementById('studentInfo').innerHTML = `
+              <p><strong>Name:</strong> ${data.name}</p>
+              <p><strong>Email:</strong> ${data.email}</p>
+              <p><strong>Roll Number:</strong> ${data.roll}</p>
+            `;
+          }
+        })
+        .catch(error => {
+          alert(error.message);
+        });
+    });
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Custom Styles for Fluid Blue Trendy Theme */
+    body {
+      background: linear-gradient(135deg, #00A0B0, #1F3A59);
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: rgba(0, 160, 176, 0.9);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #fff;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1rem;
+      font-weight: 300;
+    }
+    .container {
+      padding: 30px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .form-container {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .form-container h2 {
+      color: #fff;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #00A0B0;
+      background: #1F3A59;
+      color: white;
+      font-size: 1rem;
+    }
+    button {
+      background: #00A0B0;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #00959A;
+    }
+    .hidden {
+      display: none;
+    }
+    .student-info {
+      background: rgba(255, 255, 255, 0.3);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Secondary School Student Portal</h1>
+    <p>Register | Login | View Results</p>
+  </header>
+
+  <div class="container">
+    <!-- Registration Form -->
+    <div class="form-container">
+      <h2>Student Registration</h2>
+      <form id="registerForm">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <input type="text" id="name" placeholder="Full Name" required />
+        <input type="text" id="roll" placeholder="Roll Number" required />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-container">
+      <h2>Student Login</h2>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required />
+        <input type="password" id="loginPassword" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <!-- Student Info -->
+    <div id="studentData" class="student-info hidden">
+      <h2>Welcome</h2>
+      <div id="studentInfo"></div>
+    </div>
+  </div>
+</body>
+</html>
